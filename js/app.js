@@ -3,6 +3,10 @@ window.onscroll = function () { ScrollFunction() };
 const navbar_sticky = document.getElementById("navbar_sticky");
 const sticky = navbar_sticky.offsetTop;
 const navbar_height = document.querySelector('.navbar').offsetHeight;
+const searchInput = document.querySelector("#search-input");
+const searchButton = document.querySelector("#search-button");
+const centerSection = document.querySelector("#center");
+const searchedShowArea = document.querySelector("#searched-show-area");
 
 function ScrollFunction() {
     if (window.pageYOffset >= sticky + navbar_height) {
@@ -15,14 +19,13 @@ function ScrollFunction() {
 }
 
 const carouselInner = document.getElementById("carousel-inner");
-let aaa;
+let allShows = [];
 
-const GetData = async function () {
+const getData = async function () {
     try {
         const response = await fetch("https://api.tvmaze.com/shows");
         const data = await response.json();
-        aaa = data;
-        console.log(aaa)
+        allShows = data;
 
         for (let i = 0; i < 3; i++) {
             const div = document.createElement("div");
@@ -44,7 +47,7 @@ const GetData = async function () {
                                <a class="bg_red p-2 pe-4 ps-4 ms-3 text-white d-inline-block" href="#">Action</a>
                              </h6>
                              <p class="mt-3">${data[i].summary}</p>
-                             <p class="mb-2"><span class="col_red me-1 fw-bold">Genres:</span> ${data[i].genres}</p>
+                             <p class="mb-2"><span class="col_red me-1 fw-bold">Genres:</span> ${data[i].genres.join(", ")}</p>
                              <p><span class="col_red me-1 fw-bold">Runtime:</span>${data[i].runtime}</p>	
                              <h6 class="mt-4"><a class="button" href="${data[i]._links.previousepisode.href}"><i class="fa fa-play-circle align-middle me-1"></i> Watch Trailer</a></h6>
                             </div>`
@@ -57,4 +60,35 @@ const GetData = async function () {
     };
 }
 
-GetData();
+getData();
+
+const displayShows = function (show) {
+    const showCart = document.createElement("div");
+    showCart.classList.add("searchedShow");
+
+    showCart.innerHTML = `
+    <div class="showCart-container">
+        <img src="${show.image?.medium || 'placeholder.jpg'}" alt="${show.name}">
+        <div class = "showCart-inner-div">
+            <h2>${show.name}</h2>
+            <p>${show.genres.join(', ')}</p>
+            <p>Süre: ${show.runtime} dk</p>
+        </div>
+    </div>
+    `
+
+    searchedShowArea.appendChild(showCart);
+}
+
+const searchShows = function () {
+    searchedShowArea.innerHTML = "";
+    const searchTerm = searchInput.value.toLowerCase();
+    const filtered = allShows.filter(show => show.name.toLowerCase().includes(searchTerm));
+
+    filtered.forEach(show => displayShows(show));
+    if (searchInput.value == "") searchedShowArea.innerHTML = "";
+}
+
+searchButton.addEventListener("click", searchShows);
+
+searchInput.addEventListener("input", searchShows);

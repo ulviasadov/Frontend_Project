@@ -5,6 +5,11 @@ Author: TemplatesOnWeb
 Author URI: https://www.templateonweb.com/
 Licence: <a href="https://www.templateonweb.com/license">Website Template Licence</a>
 */
+
+.display-flex{
+    display: flex;
+}
+
 /*********************center_home****************/
 .carousel-caption{
 text-align:left;
@@ -26,6 +31,29 @@ bottom:0;
     height: 800px;
     overflow: hidden;
 }
+
+#searched-show-area{
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+.showCart-container{
+   display: flex;
+   gap: 20px;
+   margin: 15px;
+   background-color: rgb(31, 31, 31);
+   width: 450px;
+   border: 2px solid red;
+   cursor: pointer;
+   transition-duration: 0.2s;
+}
+.showCart-inner-div{
+   padding: 5px;
+}
+
+.showCart-container:hover{
+    transform: scale(1.05);
+}
 /*********************center_home_end****************/
 
 /*********************trend****************/
@@ -45,7 +73,6 @@ bottom:-50px;
 #upcome .trend_2im2{
 padding-top:90px; 
  }
-
 /*********************trend_end****************/
 
 /*********************popular****************/
