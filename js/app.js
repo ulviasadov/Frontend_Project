@@ -210,7 +210,127 @@ const handleScroll = () => {
 
 window.addEventListener("scroll", handleScroll);
 
-card.addEventListener("click", () => {
-    window.location.href = `detail.html?id=${movie.id}`;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const apiUrl = 'https://api.tvmaze.com/shows';
+let currentIndex = 0;
+let movies = [];
+
+const movieList = document.getElementById('movie-list');
+const detailPage = document.getElementById('detail-page');
+const homePage = document.getElementById('trend');
+const movieDetail = document.getElementById('movie-detail');
+const backBtn = document.getElementById('back-btn');
+const directorsChoice = document.getElementById('directors-choice');
+
+fetchMovies();
+
+loadMoreBtn.addEventListener('click', showMoreMovies);
+
+backBtn.addEventListener('click', () => {
+  detailPage.style.display = 'none';
+  homePage.style.display = 'block';
+});
+
+function fetchMovies() {
+  fetch(apiUrl)
+    .then(res => res.json())
+    .then(data => {
+      movies = data;
+      fillDirectorsChoice();
+      showMoreMovies();
+    });
+}
+
+function showMoreMovies() {
+  const moviesToShow = movies.slice(currentIndex, currentIndex + 8);
+  moviesToShow.forEach(movie => {
+    const movieCard = document.createElement('div');
+    movieCard.className = 'col-md-3 col-6 mb-4';
+    movieCard.innerHTML = `
+      <div class="trend_2im position-relative">
+        <div class="trend_2im1">
+          <div class="grid">
+            <figure class="effect-jazz mb-0">
+              <a href="#"><img src="${movie.image?.medium}" class="w-100" alt="${movie.name}"></a>
+            </figure>
+          </div>
+        </div>
+        <div class="trend_2im2 position-absolute w-100 top-0 text-center">
+          <h5><a class="col_red" href="#">${movie.name}</a></h5>
+        </div>
+      </div>
+    `;
+    movieCard.addEventListener('click', () => showMovieDetail(movie));
+    movieList.appendChild(movieCard);
   });
-  
+  currentIndex += 8;
+  if (currentIndex >= movies.length) {
+    loadMoreBtn.style.display = 'none';
+  }
+}
+
+function showMovieDetail(movie) {
+  movieDetail.innerHTML = `
+    <img src="${movie.image?.original}" class="w-100 mb-3" alt="${movie.name}">
+    <h2 class="mb-3">${movie.name}</h2>
+    <p><strong>Description:</strong> ${movie.summary || 'No description available.'}</p>
+    <p><strong>Runtime:</strong> ${movie.runtime ? movie.runtime + ' min' : 'N/A'}</p>
+    <p><strong>Rating:</strong> ${movie.rating?.average || 'N/A'}</p>
+    <p><strong>Release Year:</strong> ${movie.premiered ? movie.premiered.substring(0,4) : 'N/A'}</p>
+  `;
+  homePage.style.display = 'none';
+  detailPage.style.display = 'block';
+}
+
+function fillDirectorsChoice() {
+  const choiceMovies = movies.slice(0, 4);
+  choiceMovies.forEach(movie => {
+    const card = document.createElement('div');
+    card.className = 'col-md-3 col-6 mb-4';
+    card.innerHTML = `
+      <div class="trend_2im position-relative">
+        <div class="trend_2im1">
+          <div class="grid">
+            <figure class="effect-jazz mb-0">
+              <a href="#"><img src="${movie.image?.medium}" class="w-100" alt="${movie.name}"></a>
+            </figure>
+          </div>
+        </div>
+        <div class="trend_2im2 position-absolute w-100 top-0 text-center">
+          <h5><a class="col_red" href="#">${movie.name}</a></h5>
+        </div>
+      </div>
+    `;
+    card.addEventListener('click', () => showMovieDetail(movie));
+    directorsChoice.appendChild(card);
+  });
+}
