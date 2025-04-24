@@ -7,6 +7,7 @@ const searchInput = document.querySelector("#search-input");
 const searchButton = document.querySelector("#search-button");
 const centerSection = document.querySelector("#center");
 const searchedShowArea = document.querySelector("#searched-show-area");
+const genreFilter = document.querySelector("#genre-filter");
 
 function ScrollFunction() {
     if (window.pageYOffset >= sticky + navbar_height) {
@@ -54,6 +55,16 @@ const getData = async function () {
 
             carouselInner.appendChild(div);
         };
+
+        const allGenres = new Set();
+        allShows.forEach(show => show.genres.forEach(genre => allGenres.add(genre)));
+
+        allGenres.forEach(genre => {
+            const option = document.createElement("option");
+            option.value = genre;
+            option.textContent = genre;
+            genreFilter.appendChild(option);
+        })
     }
     catch (err) {
         console.error(err.message);
@@ -61,6 +72,47 @@ const getData = async function () {
 }
 
 getData();
+
+const latestMoviesContainer = document.querySelector("#latest-movies");
+const loadMoreBtn = document.querySelector("#load-more-btn");
+
+let latestIndex = 0;
+const showsPerPage = 8;
+
+const renderLatestMovies = () => {
+    const nextBatch = allShows.slice(latestIndex, latestIndex + showsPerPage);
+
+    nextBatch.forEach(show => {
+        const showCard = document.createElement("div");
+        showCard.classList.add("searchedShow");
+
+        showCard.innerHTML = `
+            <div class="showCart-container">
+                <img src="${show.image?.medium || 'placeholder.jpg'}" alt="${show.name}">
+                <div class="showCart-inner-div">
+                    <h2>${show.name}</h2>
+                    <p>${show.genres.join(', ')}</p>
+                    <p>Süre: ${show.runtime} dk</p>
+                </div>
+            </div>
+        `;
+
+        latestMoviesContainer.appendChild(showCard);
+    });
+
+    latestIndex += showsPerPage;
+
+    if (latestIndex >= allShows.length) {
+        loadMoreBtn.style.display = "none";
+    }
+};
+
+loadMoreBtn.addEventListener("click", renderLatestMovies);
+
+getData().then(() => {
+    renderLatestMovies();
+});
+
 
 const displayShows = function (show) {
     const showCart = document.createElement("div");
@@ -83,12 +135,77 @@ const displayShows = function (show) {
 const searchShows = function () {
     searchedShowArea.innerHTML = "";
     const searchTerm = searchInput.value.toLowerCase();
-    const filtered = allShows.filter(show => show.name.toLowerCase().includes(searchTerm));
+    const selectedGenre = genreFilter.value;
+
+    const filtered = allShows.filter(show => {
+        const matchesSearch = searchTerm === "" || show.name.toLowerCase().includes(searchTerm);
+        const matchesGenre = selectedGenre === "" || show.genres.includes(selectedGenre);
+        console.log("nese");
+        return matchesSearch && matchesGenre;
+    });
 
     filtered.forEach(show => displayShows(show));
-    if (searchInput.value == "") searchedShowArea.innerHTML = "";
+    // if (searchInput.value == "") searchedShowArea.innerHTML = "";
 }
 
 searchButton.addEventListener("click", searchShows);
-
 searchInput.addEventListener("input", searchShows);
+genreFilter.addEventListener("change", searchShows);
+
+
+const carouselItem = document.querySelector(".carousel-item");
+
+let currentPage = 0;
+let isLoading = false;
+
+const loadMoreShows = async () => {
+    if (isLoading) return;
+
+    isLoading = true;
+    try {
+        const response = await fetch(`https://api.tvmaze.com/shows?page=${currentPage}`);
+        const data = await response.json();
+
+        if (data.length === 0) {
+            window.removeEventListener("scroll", handleScroll);
+            return;
+        }
+
+        allShows = [...allShows, ...data];
+
+        data.forEach(show => {
+            const showCart = document.createElement("div");
+            showCart.classList.add("searchedShow");
+            showCart.innerHTML = `
+                <div class="showCart-container">
+                    <img src="${show.image?.medium || 'placeholder.jpg'}" alt="${show.name}">
+                    <div class="showCart-inner-div">
+                        <h2>${show.name}</h2>
+                        <p>${show.genres.join(', ')}</p>
+                        <p>Runtime: ${show.runtime}</p>
+                    </div>
+                </div>`;
+
+            carouselItem.appendChild(showCart);
+        });
+
+        currentPage++;
+    } catch (err) {
+        console.error(err);
+    }
+    isLoading = false;
+};
+
+const handleScroll = () => {
+    const bottomThreshold = 300;
+    const scrolledToBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - bottomThreshold;
+
+    const searchTerm = searchInput.value.trim();
+    const selectedGenre = genreFilter.value;
+
+    if (scrolledToBottom && searchTerm === "" && selectedGenre === "") {
+        loadMoreShows();
+    }
+};
+
+window.addEventListener("scroll", handleScroll);
