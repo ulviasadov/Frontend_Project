@@ -209,3 +209,8 @@ const handleScroll = () => {
 };
 
 window.addEventListener("scroll", handleScroll);
+
+card.addEventListener("click", () => {
+    window.location.href = `detail.html?id=${movie.id}`;
+  });
+  

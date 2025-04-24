@@ -72,6 +72,9 @@ bottom:0;
 /*********************trend****************/
 #trend{
 border-top:2px solid #de1002;
+display: flex;
+flex-direction: column;
+align-items: center;
 }
 #trend .carousel-indicators{
 bottom:-50px; 
@@ -85,6 +88,13 @@ bottom:-50px;
  }
 #upcome .trend_2im2{
 padding-top:90px; 
+ }
+ #load-more{
+    width: 100px;
+    height: 35px;
+    color: white;
+    background-color: #de1002;
+    border: none;
  }
 /*********************trend_end****************/
 
